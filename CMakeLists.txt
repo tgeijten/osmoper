@@ -1,17 +1,12 @@
+cmake_minimum_required(VERSION 3.0)
+
+set(CMAKE_MODULE_PATH "${CMAKE_MODULE_PATH}" "${CMAKE_SOURCE_DIR}/CMakeModules")
+
 set (PROGRAM_NAME noname)
 
-file (GLOB SOURCE_FILES "src/*.h" "src/*.cpp")
+get_filename_component(CONFIG_NAME "${CMAKE_BINARY_DIR}" NAME)
+set(EXECUTABLE_OUTPUT_PATH "${CMAKE_SOURCE_DIR}/bin/${CONFIG_NAME}")
+set(LIBRARY_OUTPUT_PATH "${CMAKE_SOURCE_DIR}/bin/${CONFIG_NAME}")
 
-source_group("" FILES ${SOURCE_FILES})
-
-include_directories(${XO_INCLUDE_DIR})
-
-add_executable(${PROGRAM_NAME} ${SOURCE_FILES})
-
-target_link_libraries(${PROGRAM_NAME} xo)
-
-set_target_properties(${PROGRAM_NAME} PROPERTIES
-	PROJECT_LABEL ${PROGRAM_NAME}
-	OUTPUT_NAME ${PROGRAM_NAME}
-    FOLDER ${PROGRAM_NAME}
-	)
+add_subdirectory(submodules/xo)
+add_subdirectory(src)
