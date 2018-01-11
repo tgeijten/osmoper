@@ -1,4 +1,4 @@
-set (PROGRAM_NAME noname)
+set (PROGRAM_NAME osmoper)
 
 file (GLOB SOURCE_FILES "*.h" "*.cpp")
 
@@ -8,7 +8,7 @@ add_executable(${PROGRAM_NAME} ${SOURCE_FILES})
 
 source_group("" FILES ${SOURCE_FILES})
 
-target_link_libraries(${PROGRAM_NAME} xo)
+target_link_libraries(${PROGRAM_NAME} xo ${OPENSIMSIMBODY_LIBRARIES})
 
 set_target_properties(${PROGRAM_NAME} PROPERTIES
 	PROJECT_LABEL ${PROGRAM_NAME}
