@@ -1,1 +1,1 @@
-for %%f in (process\*.mpf) do bin\Release\OpSiMoPer.exe %%f data\gait2392.osim data\delp_tlem_config.ini
+for %%f in (data\mpf\*.mpf) do bin\msvc2017_64\Release\osmoper.exe %%f config\gait2392.osim config\delp_tlem_config.ini
