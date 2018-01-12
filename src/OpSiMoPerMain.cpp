@@ -1,8 +1,6 @@
 // OSMoPer.cpp : Defines the entry point for the console application.
 //
 
-#include "stdafx.h"
-
 #include "OpSiMoPer.h"
 
 #include <iostream>
@@ -10,6 +8,7 @@
 #include "CoordinateFrame.h"
 #include "xo/system/log.h"
 #include "xo/filesystem/filesystem.h"
+#include "xo/system/log_sink.h"
 
 using std::cout;
 using std::endl;
@@ -18,6 +17,8 @@ using namespace xo;
 
 int main(int argc, char* argv[])
 {
+	log::console_sink sink( log::info_level );
+
 	if ( argc != 4 )
 	{
 		std::cout << "Usage:" << std::endl;
@@ -30,25 +31,27 @@ int main(int argc, char* argv[])
 		path mpffile( argv[ 1 ] );
 		path osmodelfile( argv[ 2 ] );
 		path configfile( argv[ 3 ] );
+		path output_filename = path( mpffile ).replace_extension( "osim" );
+		path report_prefix = mpffile.parent_path() / "reports" / mpffile.stem();
+		create_directories( report_prefix.parent_path() );
+
+		log::file_sink sink( log::trace_level, report_prefix + ".log" );
+
 		OpenSim::Model model( osmodelfile.string() );
 		moper::OpSiMoPer moper( model, configfile.string() );
-		moper.WriteModelInfo( "debug_output/model_info.txt" );
 		moper.ApplyPersonalization( mpffile.string() );
-		path output_filename = mpffile;
-		model.print( ( output_filename.replace_extension( "osim" ) ).string() );
-		std::cout << "Model conversion successful, output written to: " + output_filename.string() << std::endl;
+		model.print( output_filename.string() );
+		log::info( "Model conversion successful, output written to: " + output_filename.string() );
 
 		// write reports
-		output_filename = output_filename.parent_path() / path( "reports" ) / output_filename.filename();
-		create_directories( output_filename.parent_path() );
-		output_filename.replace_extension("");
-		std::ofstream( output_filename.string() + "_vol_report.txt" ) << moper.vol_report.str();
-		std::ofstream( output_filename.string() + "_vp_report.txt" ) << moper.vp_report.str();
-		std::ofstream( output_filename.string() + "_mus_report.txt" ) << moper.mus_data;
+		//moper.WriteModelInfo( report_prefix.string() + "_model_info.txt" );
+		std::ofstream( report_prefix.string() + "_vol_report.txt" ) << moper.vol_report.str();
+		std::ofstream( report_prefix.string() + "_vp_report.txt" ) << moper.vp_report.str();
+		std::ofstream( report_prefix.string() + "_mus_report.txt" ) << moper.mus_data;
 	}
 	catch ( std::exception& e )
 	{
-		cout << "ERROR: " << e.what() << endl;
+		log::critical( "ERROR: ", e.what() );
 #ifdef _DEBUG
 		cout << "Press any key to continue..." << endl;
 		getch();

@@ -1,16 +1,9 @@
-#include "stdafx.h"
-
 #include "OpSiMoPer.h"
 
-//#include <boost/property_tree/ini_parser.hpp>
-//#include <boost/filesystem.hpp>
-//#include <boost/format.hpp>
-//#include <boost/algorithm/string.hpp>
 #include "xo/string/string_tools.h"
 #include "xo/stream/prop_node_tools.h"
 #include "xo/filesystem/filesystem.h"
 
-using std::cout;
 using std::endl;
 using namespace xo;
 
@@ -44,10 +37,6 @@ namespace moper
 		{
 			// read moper file
 			pers = load_ini( moper_file );
-			//boost::property_tree::read_ini( moper_file, pers );
-
-			for ( auto& p : pers )
-				cout << p.first << endl;
 
 			// apply coordinate frames
 			if ( pers.has_key( "CoordinateFrames" ) )
@@ -80,7 +69,7 @@ namespace moper
 		}
 		catch ( std::exception& e )
 		{
-			cout << "ERROR: " << e.what() << endl;
+			log::error( "ERROR: ", e.what() );
 			return false;
 		}
 		return true;
@@ -121,7 +110,7 @@ namespace moper
 		// get muscles
 		// TODO: handle left / right cases properly
 		string base_name = mid_str( name, in_str( name, "_" ) + 1 );
-		std::vector< string > musnames = xo::split_str( lookup.get< string >( "MuscleVolumes." + base_name ), " \t" );
+		std::vector< string > musnames = xo::split_str( lookup.get_delimited< string >( "MuscleVolumes." + base_name, '.' ), " \t" );
 		if ( musnames.empty() )
 			return Error( name + ": Not configured..." );
 
@@ -255,7 +244,7 @@ namespace moper
 
 			for ( int idx = 0; idx < pps.getSize(); ++idx )
 			{
-				auto os_pp = pps.get( idx );
+				auto& os_pp = pps.get( idx );
 				vec3 mpf_pp_world = vec3::zero(); // the global pos of the path point
 
 				if ( use_muscle_via_point_interpolation )
@@ -281,7 +270,7 @@ namespace moper
 					auto os_point_vec3 = make_vec3( os_pp.getLocation() );
 					auto dist = length( os_point_vec3 - mpf_pp_local );
 
-					//log::trace( mus.getName(), std::setprecision( 3 ), '.', idx, ": from ", os_point_vec3, " to ", mpf_pp_local, " dist=", dist );
+					log::trace( mus.getName(), std::setprecision( 3 ), '.', idx, ": [", os_point_vec3, "] -> [", mpf_pp_local, "] dist=", dist );
 
 					os_pp.getLocation()[0] = mpf_pp_local.x;
 					os_pp.getLocation()[1] = mpf_pp_local.y;
@@ -333,7 +322,8 @@ namespace moper
 
 	std::string OpSiMoPer::TryGetLookup( const string& key )
 	{
-		return lookup.get_delimited< string >( key, '/' );
+		auto v = lookup.try_get_delimited< string >( key, '/' );
+		return v ? *v : string();
 	}
 
 	std::string OpSiMoPer::GetMpf( const string& key )
@@ -343,7 +333,8 @@ namespace moper
 
 	std::string OpSiMoPer::TryGetMpf( const string& key )
 	{
-		return pers.get_delimited< string >( key, '/' );
+		auto v = pers.try_get_delimited< string >( key, '/' );
+		return v ? *v : string();
 	}
 
 	OpSiMoPer::muscle_path OpSiMoPer::GetMpfPath( const string& muscle_name )
