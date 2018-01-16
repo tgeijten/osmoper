@@ -19,6 +19,14 @@ int main(int argc, char* argv[])
 {
 	log::console_sink sink( log::info_level );
 
+	// TEST CODE
+	vec3 o( 0.189295, 0.146616, 0.0701276 );
+	vec3 v1( 0.131111, 0.151127, 0.061063 );
+	vec3 v2( 0.24748, 0.142105, 0.0791922 );
+	auto d1 = ( v1 - o ).length();
+	auto d2 = ( v2 - o ).length();
+
+	// check arguments
 	if ( argc != 4 )
 	{
 		std::cout << "Usage:" << std::endl;
